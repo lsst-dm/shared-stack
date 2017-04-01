@@ -570,14 +570,18 @@ def main(stack_dir):
 
         for tag in candidate_tags:
             print("  Installing %s tagged %s" % (product, tag))
-            sm.distrib_install(product, tag=tag)
-            if tag not in sm.tags():
-                print("  Adding global tag %s" % (tag,))
-                sm.add_global_tag(tag)
+            try:
+                sm.distrib_install(product, tag=tag)
+                if tag not in sm.tags():
+                    print("  Adding global tag %s" % (tag,))
+                    sm.add_global_tag(tag)
 
-            print("  Applying tag %s" % (tag,))
-            for sub_product, version in rm.products_for_tag(tag):
-                sm.apply_tag(sub_product, version, tag)
+                print("  Applying tag %s" % (tag,))
+                for sub_product, version in rm.products_for_tag(tag):
+                    sm.apply_tag(sub_product, version, tag)
+
+            except subprocess.CalledProcessError:
+                print("  Failed to install %s tagged %s; skipping" % (product, tag))
 
         # Tag as current based on date ordering on server.
         available_tags = server_tags.intersection(sm.tags_for_product(product))
