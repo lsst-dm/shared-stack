@@ -492,7 +492,7 @@ class StackManager(object):
             print("Miniconda installed.")
 
         sm.conda("install", "anaconda", ANACONDA_VERSION)
-        for package in "nomkl numpy scipy scikit-learn numexpr".split():
+        for package in "nomkl numpy scipy scikit-learn numexpr astropy".split():
             sm.conda("install", package)
         for package in "mkl mkl-service".split():
             try:
