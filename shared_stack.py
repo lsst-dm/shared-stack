@@ -95,7 +95,7 @@ EUPS_PKGROOT = "https://sw.lsstcorp.org/eupspkg/"
 
 # Version of the EUPS to install when creating a new stack. Should correspond
 # to a tag defined at https://github.com/RobertLuptonTheGood/eups.
-EUPS_VERSION = "2.0.2"
+EUPS_VERSION = "2.1.2"
 
 # Version of LSST's miniconda2 package to install. Should correspond to a
 # version distributed through ``EUPS_PKGROOT``.
