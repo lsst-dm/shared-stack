@@ -99,11 +99,10 @@ EUPS_VERSION = "2.1.2"
 
 # Version of LSST's miniconda2 package to install. Should correspond to a
 # version distributed through ``EUPS_PKGROOT``.
-MINICONDA2_VERSION = "3.19.0.lsst4"
+MINICONDA2_VERSION = "4.2.12.lsst2"
 
-# Version of Anaconda to install. Should correspond to the version of
-# Miniconda defined above.
-ANACONDA_VERSION = "2.5.0"
+# Version of Anaconda to install.
+ANACONDA_VERSION = "4.3.1"
 
 # Top-level products to install into the stack.
 PRODUCTS = ["lsst_distrib"]
