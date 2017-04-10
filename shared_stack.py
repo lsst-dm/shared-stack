@@ -95,15 +95,14 @@ EUPS_PKGROOT = "https://sw.lsstcorp.org/eupspkg/"
 
 # Version of the EUPS to install when creating a new stack. Should correspond
 # to a tag defined at https://github.com/RobertLuptonTheGood/eups.
-EUPS_VERSION = "2.0.2"
+EUPS_VERSION = "2.1.2"
 
 # Version of LSST's miniconda2 package to install. Should correspond to a
 # version distributed through ``EUPS_PKGROOT``.
-MINICONDA2_VERSION = "3.19.0.lsst4"
+MINICONDA2_VERSION = "4.2.12.lsst2"
 
-# Version of Anaconda to install. Should correspond to the version of
-# Miniconda defined above.
-ANACONDA_VERSION = "2.5.0"
+# Version of Anaconda to install.
+ANACONDA_VERSION = "4.3.1"
 
 # Top-level products to install into the stack.
 PRODUCTS = ["lsst_distrib"]
@@ -493,7 +492,7 @@ class StackManager(object):
             print("Miniconda installed.")
 
         sm.conda("install", "anaconda", ANACONDA_VERSION)
-        for package in "nomkl numpy scipy scikit-learn numexpr".split():
+        for package in "nomkl numpy scipy scikit-learn numexpr astropy".split():
             sm.conda("install", package)
         for package in "mkl mkl-service".split():
             try:
