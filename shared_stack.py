@@ -492,6 +492,7 @@ class StackManager(object):
 
         sm = StackManager(stack_dir, pkgroot=pkgroot,
                           userdata=userdata, debug=debug)
+        sm.set_config("hooks.config.site.lockDirectoryBase = None")  # DM-8872
         sm.distrib_install("miniconda2", version=MINICONDA2_VERSION)
         sm.apply_tag("miniconda2", MINICONDA2_VERSION, "current")
         if debug:
