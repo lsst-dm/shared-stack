@@ -367,6 +367,14 @@ class StackManager(object):
         return StackManager._check_output(to_exec, env=self.eups_environ,
                                           universal_newlines=True)
 
+    def set_config(self, line):
+        """
+        Add a line to the stack's startup.py file.
+        """
+        startup_path = os.path.join(self.stack_dir, "site", "startup.py")
+        with open(startup_path, "a") as startup_py:
+            startup_py.write(line)
+
     def conda(self, action, package_name, version=None):
         """
         Perform ``action`` ("install", "remove", etc) on package named
@@ -424,10 +432,8 @@ class StackManager(object):
         products with tags that have been pre-declared in startup.py.
         Therefore, we need to call this before we can use ``apply_tag()``.
         """
-        startup_path = os.path.join(self.stack_dir, "site", "startup.py")
-        with open(startup_path, "a") as startup_py:
-            startup_py.write('hooks.config.Eups.globalTags += ["%s"]\n' %
-                             (tagname,))
+        self.set_config('hooks.config.Eups.globalTags += ["%s"]\n' %
+                        (tagname,))
 
     def tags(self):
         """
