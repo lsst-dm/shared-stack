@@ -91,7 +91,7 @@ except ImportError:
 DEBUG = False
 
 # Package distribution server to use.
-EUPS_PKGROOT = "https://sw.lsstcorp.org/eupspkg/"
+EUPS_PKGROOT = "https://eups.lsst.codes/stack/src"
 
 # Version of the EUPS to install when creating a new stack. Should correspond
 # to a tag defined at https://github.com/RobertLuptonTheGood/eups.
@@ -250,7 +250,7 @@ class RepositoryManager(object):
         self.pkgroot = pkgroot
 
         h = html.parse(urlopen(self.pkgroot + "/tags"))
-        for el in h.findall("./body/pre/a"):
+        for el in h.findall("./body/table/tr/td/a"):
             if el.text[-5:] == ".list" and re.match(pattern, el.text):
                 u = urlopen(pkgroot + '/tags/' + el.get('href'))
                 tag_date = datetime.strptime(u.info()['last-modified'],
