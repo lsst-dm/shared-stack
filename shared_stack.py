@@ -36,13 +36,10 @@ tool <http://developer.lsst.io/en/latest/build-ci/lsstsw.html>`_.
 Specifically, when pointed (``ROOT``, defined below) at a
 directory which does not exist, we:
 
-- Install EUPS into that directory;
-- Use ``eups distrib`` to install Miniconda into the directory;
-- Use ``conda install`` to update that Miniconda to a full Anaconda
-  installation;
-- Create shell initialization scripts which set up EUPS and the Anaconda
-  Python installation (``loadLSST.bash``, ``.csh``, ``.ksh``, ``.zsh``).
-- Proceed with the stack maintenance procedure, defined below.
+- Bootstrap a new stack installation in that directory, using the standard
+  LSST newinstall.sh script;
+- Add some optional Conda packages that developers find convenient;
+- Set the EUPS configuration to disable locking (usually a good idea).
 
 When ``ROOT`` exists and contains an installed version of EUPS, the following
 maintainance procedure is followed:
@@ -54,7 +51,7 @@ maintainance procedure is followed:
 - Sort the installed tags by date they were created on the server and tag the
   most recent as "current".
 
-This tool requires Python (tested with 2.6, 2.7 and 3.5) and `lxml
+This tool requires Python (tested with 2.6, 2.7 and 3.6) and `lxml
 <http://lxml.de/>`_; the latter may be conveniently installed using ``pip``::
 
   $ pip install -r requirements.txt
@@ -69,12 +66,10 @@ import os
 import shutil
 import re
 import subprocess
-import tarfile
 import tempfile
 from argparse import ArgumentParser
 from datetime import datetime
 from lxml import html
-from textwrap import dedent
 try:
     # Python 3
     from urllib.request import urlopen
@@ -93,16 +88,18 @@ DEBUG = False
 # Package distribution server to use.
 EUPS_PKGROOT = "https://eups.lsst.codes/stack/src"
 
-# Version of the EUPS to install when creating a new stack. Should correspond
-# to a tag defined at https://github.com/RobertLuptonTheGood/eups.
-EUPS_VERSION = "2.1.2"
+# newinstall.sh location
+NEWINSTALL_URL = "https://raw.githubusercontent.com/lsst/lsst/master/scripts/newinstall.sh"
 
-# Version of LSST's miniconda2 package to install. Should correspond to a
-# version distributed through ``EUPS_PKGROOT``.
-MINICONDA2_VERSION = "4.2.12.lsst2"
-
-# Version of Anaconda to install.
-ANACONDA_VERSION = "4.3.1"
+# Tuples of (name, version) to be installed using Conda before we add the
+# stack. Version of `None` is equivalent to "don't care".
+CONDA_PKGS = [
+    ("ipython", None),
+    ("ipython-notebook", None),
+    ("pep8", None),
+    ("pyflakes", None),
+    ("matplotlib", "2.0.2")
+]
 
 # Top-level products to install into the stack.
 PRODUCTS = ["lsst_distrib"]
@@ -307,14 +304,15 @@ class StackManager(object):
         # going through setups.sh.
         self.eups_environ = os.environ.copy()
         self.eups_environ.update({
-            "PATH": "%s:%s" % (os.path.join(stack_dir, "eups", "bin"),
-                               self.eups_environ['PATH']),
-            "EUPS_PATH": stack_dir,
-            "EUPS_DIR": os.path.join(stack_dir, "eups"),
+            "PATH": "%s:%s:%s" % (os.path.join(stack_dir, "eups", "current", "bin"),
+                                  os.path.join(stack_dir, "python", "current", "bin"),
+                                  self.eups_environ['PATH']),
+            "EUPS_PATH": os.path.join(stack_dir, "stack", "current"),
+            "EUPS_DIR": os.path.join(stack_dir, "eups", "current"),
             "EUPS_SHELL": "sh",
-            "PYTHONPATH": os.path.join(stack_dir, "eups", "python"),
+            "PYTHONPATH": os.path.join(stack_dir, "eups", "current", "python"),
             "SETUP_EUPS": ("eups LOCAL:%s -f (none) -Z (none)" %
-                           (os.path.join(stack_dir, "eups"),)),
+                           (os.path.join(stack_dir, "eups", "current"),)),
             "EUPS_PKGROOT": pkgroot
         })
         if userdata:
@@ -342,19 +340,6 @@ class StackManager(object):
                     continue
                 self._product_tracker.insert(product, version, tag)
 
-        # If a current version of miniconda2 is available, add it to our
-        # environment.
-        try:
-            miniconda_version = self._product_tracker.current("miniconda2")
-        except IndexError:
-            miniconda_version = None
-        if miniconda_version:
-            miniconda_path = os.path.join(self.stack_dir, self.flavor,
-                                          "miniconda2", miniconda_version)
-            self.eups_environ["PATH"] = "%s:%s" % (os.path.join(miniconda_path,
-                                                                "bin"),
-                                                   self.eups_environ["PATH"])
-
     def _run_cmd(self, cmd, *args):
         """
         Run an ``eups`` command to manipulate the local stack.
@@ -371,7 +356,8 @@ class StackManager(object):
         """
         Add a line to the stack's startup.py file.
         """
-        startup_path = os.path.join(self.stack_dir, "site", "startup.py")
+        startup_path = os.path.join(self.stack_dir, "eups", "current",
+                                    "site", "startup.py")
         with open(startup_path, "a") as startup_py:
             startup_py.write(line)
 
@@ -383,10 +369,6 @@ class StackManager(object):
 
         Returns the output from executing the command.
         """
-        if not self._product_tracker.current("miniconda2"):
-            print("Miniconda not available; cannot %s %s" %
-                  (action, package_name))
-            return
         if version:
             package = "%s=%s" % (package_name, version)
         else:
@@ -453,84 +435,35 @@ class StackManager(object):
             self._product_tracker.insert(product_name, version, tagname)
 
     @staticmethod
-    def create_stack(stack_dir, pkgroot=EUPS_PKGROOT, userdata=None,
-                     python="/usr/bin/python", debug=DEBUG):
+    def create_stack(stack_dir, pkgroot=EUPS_PKGROOT,
+                     userdata=None, debug=DEBUG):
         """
-        Bootstrap a stack in ``stack_dir``.
+        Bootstrap a stack in ``stack_dir`` by fetching & running newinstall.sh.
 
-        ``stack_dir`` should not already exist. We will install EUPS and
-        Anaconda in it, returning an initialized StackManager.
+        Arguments are as for ``StackManager.__init__()``, but note that
+        ``stack_dir`` must not already exist.
 
-        The ``python`` argument is only used for bootstrapping EUPS: for
-        working with the stack, we will use Anaconda.
-
-        Other arguments are as for ``StackManager.__init__()``.
+        An initialized StackManager is returned.
         """
         # Refuses to proceed if ``stack_dir`` already exists.
         os.makedirs(stack_dir)
 
-        # Install EUPS into the stack directory.
-        EUPS_URL = "https://github.com/RobertLuptonTheGood/eups/archive/%s.tar.gz" % (EUPS_VERSION,)
-        eups_download = urlopen(EUPS_URL)
-        tf = tarfile.open(fileobj=eups_download, mode="r|gz")
-        eups_build_dir = tempfile.mkdtemp()
-        try:
-            tf.extractall(eups_build_dir)
-            StackManager._check_output(["./configure",
-                                        "-prefix=%s/eups" % (stack_dir,),
-                                        "--with-eups=%s" % (stack_dir,),
-                                        "--with-python=%s" % (python,)],
-                                       cwd=os.path.join(eups_build_dir,
-                                                        "eups-%s" % (EUPS_VERSION,)))
-            StackManager._check_output(["make", "install"],
-                                       cwd=os.path.join(eups_build_dir,
-                                                        "eups-%s" % (EUPS_VERSION,)))
-            if debug:
-                print("Done installing EUPS %s" % (EUPS_VERSION,))
-        finally:
-            shutil.rmtree(eups_build_dir)
+        # We'll use newinstall.sh to bootstrap our stack according to current
+        # "best" practice.
+        newinstall_filename = os.path.join(stack_dir, "newinstall.sh")
+        with open(newinstall_filename, "wb") as newinstall_file:
+            newinstall_file.write(urlopen(NEWINSTALL_URL).read())
+
+        subprocess.check_call(["/bin/bash", newinstall_filename, "-b"],
+                              cwd=stack_dir)
 
         sm = StackManager(stack_dir, pkgroot=pkgroot,
                           userdata=userdata, debug=debug)
         sm.set_config("hooks.config.site.lockDirectoryBase = None")  # DM-8872
-        sm.distrib_install("miniconda2", version=MINICONDA2_VERSION)
-        sm.apply_tag("miniconda2", MINICONDA2_VERSION, "current")
-        if debug:
-            print("Miniconda installed.")
 
-        sm.conda("install", "anaconda", ANACONDA_VERSION)
-        for package in "nomkl numpy scipy scikit-learn numexpr astropy".split():
-            sm.conda("install", package)
-        for package in "mkl mkl-service".split():
-            try:
-                sm.conda("remove", package)
-            except subprocess.CalledProcessError:
-                print("Failed to remove conda package %s;" % (package, ), end=" ")
-                print("pressing on regardless.")
-        # Set the permissions on the Anaconda dir to avoid end users
-        # creating undeletable .pyc files.
-        StackManager._check_output(["chmod", "-R", "g-w",
-                                    os.path.join(stack_dir, determine_flavor(),
-                                                 "miniconda2",
-                                                 MINICONDA2_VERSION)])
-        if debug:
-            print("Upgraded to Anaconda %s" % (ANACONDA_VERSION,))
+        for pkg in CONDA_PKGS:
+            sm.conda("install", pkg[0], pkg[1])
 
-        loader_template = dedent("""
-        source %s
-        setup miniconda2
-        """).strip()
-        for lsstSuffix, eupsSuffix in (('bash', 'sh'),
-                                       ('csh', 'csh'),
-                                       ('ksh', 'sh'),
-                                       ('zsh', 'zsh')):
-            with open(os.path.join(stack_dir,
-                      "loadLSST.%s" % (lsstSuffix,)), 'w') as f:
-                f.write(loader_template %
-                        (os.path.join(stack_dir, "eups", "bin",
-                                      "setups.%s" % (eupsSuffix,))))
-
-        sm.distrib_install("lsst")
         return sm
 
     @staticmethod
