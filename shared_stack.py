@@ -94,11 +94,9 @@ NEWINSTALL_URL = "https://raw.githubusercontent.com/lsst/lsst/master/scripts/new
 # Tuples of (name, version) to be installed using Conda before we add the
 # stack. Version of `None` is equivalent to "don't care".
 CONDA_PKGS = [
-    ("ipython", None),
-    ("ipython-notebook", None),
+    ("jupyter", None),
     ("pep8", None),
     ("pyflakes", None),
-    ("matplotlib", "2.0.2")
 ]
 
 # Top-level products to install into the stack.
