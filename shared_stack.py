@@ -91,14 +91,15 @@ EUPS_PKGROOT = "https://eups.lsst.codes/stack/src"
 # newinstall.sh location
 NEWINSTALL_URL = "https://raw.githubusercontent.com/lsst/lsst/master/scripts/newinstall.sh"
 
+# Python version to be requested from newinstall.sh
+PYVER = "3"
+
 # Tuples of (name, version) to be installed using Conda before we add the
 # stack. Version of `None` is equivalent to "don't care".
 CONDA_PKGS = [
-    ("ipython", None),
-    ("ipython-notebook", None),
+    ("jupyter", None),
     ("pep8", None),
     ("pyflakes", None),
-    ("matplotlib", "2.0.2")
 ]
 
 # Top-level products to install into the stack.
@@ -110,7 +111,7 @@ ROOT = '/ssd/lsstsw/stack'
 # Only tags matching this regular expression will be fetched from
 # ``EUPS_PKGROOT`` and hence considered for local installation. The more tags
 # are matched, the slower things will be.
-VERSION_GLOB = r"w_2017_(\d|1[013456789]|[2-5]\d)\.|v13_\d"
+VERSION_GLOB = r"w_2017_[45]\d"
 
 
 def determine_flavor():
@@ -359,7 +360,7 @@ class StackManager(object):
         startup_path = os.path.join(self.stack_dir, "eups", "current",
                                     "site", "startup.py")
         with open(startup_path, "a") as startup_py:
-            startup_py.write(line)
+            startup_py.write(line + "\n")
 
     def conda(self, action, package_name, version=None):
         """
@@ -414,7 +415,7 @@ class StackManager(object):
         products with tags that have been pre-declared in startup.py.
         Therefore, we need to call this before we can use ``apply_tag()``.
         """
-        self.set_config('hooks.config.Eups.globalTags += ["%s"]\n' %
+        self.set_config('hooks.config.Eups.globalTags += ["%s"]' %
                         (tagname,))
 
     def tags(self):
@@ -454,7 +455,7 @@ class StackManager(object):
         with open(newinstall_filename, "wb") as newinstall_file:
             newinstall_file.write(urlopen(NEWINSTALL_URL).read())
 
-        subprocess.check_call(["/bin/bash", newinstall_filename, "-b"],
+        subprocess.check_call(["/bin/bash", newinstall_filename, "-b", "-" + PYVER],
                               cwd=stack_dir)
 
         sm = StackManager(stack_dir, pkgroot=pkgroot,
