@@ -113,6 +113,11 @@ ROOT = '/ssd/lsstsw/stack'
 # are matched, the slower things will be.
 VERSION_GLOB = r"w_2017_[45]\d"
 
+# Create a Conda environment with this name for the shared stack installation.
+# Note that a Conda environment with some sort of name is required by
+# newinstall.sh; here, we choose something easy to predict, rather than trying
+# to determine it from a SHA1.
+LSST_CONDA_ENV_NAME="lsst-scipipe"
 
 def determine_flavor():
     """
@@ -305,16 +310,20 @@ class StackManager(object):
         # going through setups.sh.
         self.eups_environ = os.environ.copy()
         self.eups_environ.update({
-            "PATH": "%s:%s:%s" % (os.path.join(stack_dir, "eups", "current", "bin"),
-                                  os.path.join(stack_dir, "python", "current", "bin"),
-                                  self.eups_environ['PATH']),
+            "PATH": "%s:%s:%s:%s" % (os.path.join(stack_dir, "python", "current", "envs", LSST_CONDA_ENV_NAME, "bin"),
+                                     os.path.join(stack_dir, "eups", "current", "bin"),
+                                     os.path.join(stack_dir, "python", "current", "bin"),
+                                     self.eups_environ['PATH']),
             "EUPS_PATH": os.path.join(stack_dir, "stack", "current"),
             "EUPS_DIR": os.path.join(stack_dir, "eups", "current"),
             "EUPS_SHELL": "sh",
             "PYTHONPATH": os.path.join(stack_dir, "eups", "current", "python"),
             "SETUP_EUPS": ("eups LOCAL:%s -f (none) -Z (none)" %
                            (os.path.join(stack_dir, "eups", "current"),)),
-            "EUPS_PKGROOT": pkgroot
+            "EUPS_PKGROOT": pkgroot,
+            "CONDA_PREFIX": os.path.join(stack_dir, "python", "current", "envs", LSST_CONDA_ENV_NAME),
+            "CONDA_PYTHON_EXE": os.path.join(stack_dir, "python", "current", "bin", "python"),
+            "CONDA_DEFAULT_ENV": LSST_CONDA_ENV_NAME
         })
         if userdata:
             self.eups_environ["EUPS_USERDATA"] = userdata
@@ -374,7 +383,7 @@ class StackManager(object):
             package = "%s=%s" % (package_name, version)
         else:
             package = package_name
-        to_exec = ["conda", action, "--yes", package]
+        to_exec = ["conda", action, "--name", LSST_CONDA_ENV_NAME, "--yes", package]
         if self.debug:
             print(self.eups_environ)
             print(to_exec)
@@ -455,8 +464,11 @@ class StackManager(object):
         with open(newinstall_filename, "wb") as newinstall_file:
             newinstall_file.write(urlopen(NEWINSTALL_URL).read())
 
+        newinstall_environ = os.environ.copy()
+        newinstall_environ.update({"LSST_CONDA_ENV_NAME": LSST_CONDA_ENV_NAME})
+
         subprocess.check_call(["/bin/bash", newinstall_filename, "-b", "-" + PYVER],
-                              cwd=stack_dir)
+                              env=newinstall_environ, cwd=stack_dir)
 
         sm = StackManager(stack_dir, pkgroot=pkgroot,
                           userdata=userdata, debug=debug)
