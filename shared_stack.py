@@ -103,7 +103,7 @@ CONDA_PKGS = [
 ]
 
 # Top-level products to install into the stack.
-PRODUCTS = ["lsst_distrib"]
+PRODUCTS = ["lsst_sims", "lsst_distrib"]
 
 # Root directory in which the stack will be created or updated.
 ROOT = '/ssd/lsstsw/stack'
@@ -111,7 +111,7 @@ ROOT = '/ssd/lsstsw/stack'
 # Only tags matching this regular expression will be fetched from
 # ``EUPS_PKGROOT`` and hence considered for local installation. The more tags
 # are matched, the slower things will be.
-VERSION_GLOB = r"w_2017_[45]\d"
+VERSION_GLOB = r"(sims_)?w_2018_(4[2-9]|5[0-2])"
 
 # Create a Conda environment with this name for the shared stack installation.
 # Note that a Conda environment with some sort of name is required by
