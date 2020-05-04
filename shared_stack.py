@@ -108,10 +108,7 @@ PRODUCTS = ["lsst_sims", "lsst_distrib"]
 # Root directory in which the stack will be created or updated.
 ROOT = '/ssd/lsstsw/stack'
 
-# Only tags matching this regular expression will be fetched from
-# ``EUPS_PKGROOT`` and hence considered for local installation. The more tags
-# are matched, the slower things will be.
-VERSION_GLOB = r"(sims_)?w_2018_(4[2-9]|5[0-2])"
+# VERSION_GLOB is now set by the argparser.
 
 # Create a Conda environment with this name for the shared stack installation.
 # Note that a Conda environment with some sort of name is required by
@@ -486,19 +483,19 @@ class StackManager(object):
         return output
 
 
-def main(stack_dir):
+def main(cfg):
     # We create a temporary directory for the EUPS cache etc. This means we
     # can run multiple instances of StackManager simultaneously without them
     # clobbering each other.
     userdata = tempfile.mkdtemp()
 
     # If the stack doesn't already exist, create it.
-    if not os.path.exists(stack_dir):
-        sm = StackManager.create_stack(stack_dir, userdata=userdata)
+    if not os.path.exists(cfg.root):
+        sm = StackManager.create_stack(cfg.root, userdata=userdata)
     else:
-        sm = StackManager(stack_dir, userdata=userdata)
+        sm = StackManager(cfg.root, userdata=userdata)
 
-    rm = RepositoryManager(pattern=VERSION_GLOB)
+    rm = RepositoryManager(pattern=cfg.version_glob)
 
     for product in PRODUCTS:
         print("Considering %s" % (product,))
@@ -536,4 +533,15 @@ def main(stack_dir):
 if __name__ == "__main__":
     parser = ArgumentParser(description="Maintain a shared EUPS stack.")
     parser.add_argument('--root', help="target directory", default=ROOT)
-    main(parser.parse_args().root)
+    # Only tags matching this regular expression will be fetched from
+    # ``EUPS_PKGROOT`` and hence considered for local installation. The more tags
+    # are matched, the slower things will be.
+    #VERSION_GLOB = r"(sims_)?w_2019_\d\d|v17_0|v17_0_1"
+    #VERSION_GLOB = r"(sims_)?w_2019_(1[2-9]|[2-5]\d)"
+    #VERSION_GLOB = r"((sims_)?w_2019_(1[2-9]|[2-5]\d))|(d_2019_09_30)"
+    #VERSION_GLOB = r"(sims_)?w_2019_(4[3-9]|5\d)"
+    #VERSION_GLOB = r"w_2020_(0[7-9]|[1-5]\d)"
+    #VERSION_GLOB = r"(sims_)?w_2020_[1-5]\d"
+    VERSION_GLOB = r"(sims_)?w_2020_(18|19|[2-5]\d)"
+    parser.add_argument('--version-glob', help="pattern to install", default=VERSION_GLOB)
+    main(parser.parse_args())
