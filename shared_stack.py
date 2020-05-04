@@ -306,25 +306,11 @@ class StackManager(object):
         # Generate extra output
         self.debug = debug
 
-        # Generate a minimal working environment for EUPS; best guess without
-        # going through setups.sh.
-        self.eups_environ = os.environ.copy()
-        self.eups_environ.update({
-            "PATH": "%s:%s:%s:%s" % (os.path.join(stack_dir, "python", "current", "envs", LSST_CONDA_ENV_NAME, "bin"),
-                                     os.path.join(stack_dir, "eups", "current", "bin"),
-                                     os.path.join(stack_dir, "python", "current", "bin"),
-                                     self.eups_environ['PATH']),
-            "EUPS_PATH": os.path.join(stack_dir, "stack", "current"),
-            "EUPS_DIR": os.path.join(stack_dir, "eups", "current"),
-            "EUPS_SHELL": "sh",
-            "PYTHONPATH": os.path.join(stack_dir, "eups", "current", "python"),
-            "SETUP_EUPS": ("eups LOCAL:%s -f (none) -Z (none)" %
-                           (os.path.join(stack_dir, "eups", "current"),)),
-            "EUPS_PKGROOT": pkgroot,
-            "CONDA_PREFIX": os.path.join(stack_dir, "python", "current", "envs", LSST_CONDA_ENV_NAME),
-            "CONDA_PYTHON_EXE": os.path.join(stack_dir, "python", "current", "bin", "python"),
-            "CONDA_DEFAULT_ENV": LSST_CONDA_ENV_NAME
-        })
+	# Construct the environment for running EUPS by sourcing loadLSST.bash
+	# and replicating what it does to the environment.
+	self.eups_environ = dict(var.split(b"=", 1) for var in
+                                 subprocess.check_output("source %s ; env -0" % (os.path.join(stack_dir, "loadLSST.bash"),), shell=True).split(b'\x00')
+                                 if len(var.split(b"=", 1)) == 2)
         if userdata:
             self.eups_environ["EUPS_USERDATA"] = userdata
 
