@@ -315,9 +315,9 @@ class StackManager(object):
         # Generate extra output
         self.debug = debug
 
-	# Construct the environment for running EUPS by sourcing loadLSST.bash
-	# and replicating what it does to the environment.
-	self.eups_environ = dict(var.split(b"=", 1) for var in
+        # Construct the environment for running EUPS by sourcing loadLSST.bash
+        # and replicating what it does to the environment.
+        self.eups_environ = dict(var.split(b"=", 1) for var in
                                  subprocess.check_output("source %s ; env -0" % (os.path.join(stack_dir, "loadLSST.bash"),), shell=True).split(b'\x00')
                                  if len(var.split(b"=", 1)) == 2)
         if userdata:
