@@ -379,6 +379,8 @@ class StackManager(object):
         else:
             package = package_name
         to_exec = ["conda", action, "--name", LSST_CONDA_ENV_NAME, "--yes", package]
+        if "action" == "install":
+            to_exec.insert(2, "--no-update-deps")
         if self.debug:
             print(self.eups_environ)
             print(to_exec)
