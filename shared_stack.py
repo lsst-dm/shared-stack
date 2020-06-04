@@ -100,6 +100,18 @@ CONDA_PKGS = [
     ("jupyter", None),
     ("pep8", None),
     ("pyflakes", None),
+    ("panel", None),
+    ("holoviews", None),
+    ("hvplot", None),
+    ("bokeh", None),
+    ("pyviz_comms", None),
+    ("fastparquet", None),
+    ("numba", None),
+    ("datashaderpyct", None),
+    ("dask-jobqueue", None),
+    ("cx_Oracle", None),
+    ("ipdb", None),
+    ("psycopg2", None),
 ]
 
 # Top-level products to install into the stack.
