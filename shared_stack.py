@@ -511,7 +511,7 @@ def main(cfg):
 
     rm = RepositoryManager(pattern=cfg.version_glob)
 
-    for product in PRODUCTS:
+    for product in cfg.products:
         print("Considering %s" % (product,))
         server_tags = rm.tags_for_product(product)
         installed_tags = sm.tags_for_product(product)
@@ -547,6 +547,7 @@ def main(cfg):
 if __name__ == "__main__":
     parser = ArgumentParser(description="Maintain a shared EUPS stack.")
     parser.add_argument('--root', help="target directory", default=ROOT)
+    parser.add_argument('--products', nargs="+", help="products to install", default=PRODUCTS)
     # Only tags matching this regular expression will be fetched from
     # ``EUPS_PKGROOT`` and hence considered for local installation. The more tags
     # are matched, the slower things will be.
