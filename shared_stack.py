@@ -91,9 +91,6 @@ EUPS_PKGROOT = "https://eups.lsst.codes/stack/src"
 # newinstall.sh location
 NEWINSTALL_URL = "https://raw.githubusercontent.com/lsst/lsst/master/scripts/newinstall.sh"
 
-# Python version to be requested from newinstall.sh
-PYVER = "3"
-
 # Tuples of (name, version) to be installed using Conda before we add the
 # stack. Version of `None` is equivalent to "don't care".
 CONDA_PKGS = [
@@ -465,7 +462,7 @@ class StackManager(object):
         newinstall_environ = os.environ.copy()
         newinstall_environ.update({"LSST_CONDA_ENV_NAME": LSST_CONDA_ENV_NAME})
 
-        subprocess.check_call(["/bin/bash", newinstall_filename, "-b", "-" + PYVER],
+        subprocess.check_call(["/bin/bash", newinstall_filename, "-b"],
                               env=newinstall_environ, cwd=stack_dir)
 
         sm = StackManager(stack_dir, pkgroot=pkgroot,
