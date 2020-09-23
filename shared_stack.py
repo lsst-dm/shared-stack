@@ -376,7 +376,7 @@ class StackManager(object):
             package = "%s=%s" % (package_name, version)
         else:
             package = package_name
-        to_exec = ["conda", action, "--name", LSST_CONDA_ENV_NAME, "--yes", package]
+        to_exec = ["conda", action, "--yes", package]
         if "action" == "install":
             to_exec.insert(2, "--no-update-deps")
         if self.debug:
