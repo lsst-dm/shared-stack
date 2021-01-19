@@ -468,7 +468,6 @@ class StackManager(object):
 
         sm = StackManager(stack_dir, pkgroot=pkgroot,
                           userdata=userdata, debug=debug)
-        sm.set_config("hooks.config.site.lockDirectoryBase = None")  # DM-8872
 
         for pkg in CONDA_PKGS:
             sm.conda("install", pkg[0], pkg[1])
