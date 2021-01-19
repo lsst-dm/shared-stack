@@ -555,6 +555,7 @@ if __name__ == "__main__":
     #VERSION_GLOB = r"(sims_)?w_2019_(4[3-9]|5\d)"
     #VERSION_GLOB = r"w_2020_(0[7-9]|[1-5]\d)"
     #VERSION_GLOB = r"(sims_)?w_2020_[1-5]\d"
-    VERSION_GLOB = r"(sims_)?w_2020_(18|19|[2-5]\d)"
+    #VERSION_GLOB = r"((sims_)?w_2020_(38|39|[4-5]\d))"
+    VERSION_GLOB = r"((sims_)?w_2021_\d\d)"
     parser.add_argument('--version-glob', help="pattern to install", default=VERSION_GLOB)
     main(parser.parse_args())
