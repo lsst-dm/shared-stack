@@ -473,6 +473,18 @@ class StackManager(object):
         for pkg in CONDA_PKGS:
             sm.conda("install", pkg[0], pkg[1])
 
+        # Change the permissions on the newly created conda environment
+	for base_path in (("pkgs",), ("envs", LSST_CONDA_ENV_NAME, "pkgs")):
+	    conda_pkg_path = os.path.join(stack_dir, "conda", "current", *base_path)
+	    for dir_path, _, files in os.walk(os.path.join(conda_pkg_path, "cache")):
+                os.chmod(dir_path, 0o2755)
+                for f in files:
+                    full_path = os.path.join(dir_path, f)
+                    os.chmod(full_path, 0o644)
+	    os.chmod(os.path.join(conda_pkg_path, "urls"), 0o644)
+	    os.chmod(os.path.join(conda_pkg_path, "urls.txt"), 0o644)
+
+
         return sm
 
     @staticmethod
