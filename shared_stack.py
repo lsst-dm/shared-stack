@@ -125,7 +125,8 @@ ROOT = '/ssd/lsstsw/stack'
 # Note that a Conda environment with some sort of name is required by
 # newinstall.sh; here, we choose something easy to predict, rather than trying
 # to determine it from a SHA1.
-LSST_CONDA_ENV_NAME="lsst-scipipe"
+LSST_CONDA_ENV_NAME = "lsst-scipipe"
+
 
 def determine_flavor():
     """
@@ -317,7 +318,9 @@ class StackManager(object):
         # Construct the environment for running EUPS by sourcing loadLSST.bash
         # and replicating what it does to the environment.
         self.eups_environ = dict(var.split(b"=", 1) for var in
-                                 subprocess.check_output("source %s ; env -0" % (os.path.join(stack_dir, "loadLSST.bash"),), shell=True).split(b'\x00')
+                                 subprocess.check_output(
+                                     "source %s ; env -0" % (os.path.join(stack_dir, "loadLSST.bash"),),
+                                     shell=True).split(b'\x00')
                                  if len(var.split(b"=", 1)) == 2)
         if userdata:
             self.eups_environ["EUPS_USERDATA"] = userdata
@@ -474,16 +477,15 @@ class StackManager(object):
             sm.conda("install", pkg[0], pkg[1])
 
         # Change the permissions on the newly created conda environment
-	for base_path in (("pkgs",), ("envs", LSST_CONDA_ENV_NAME, "pkgs")):
-	    conda_pkg_path = os.path.join(stack_dir, "conda", "current", *base_path)
-	    for dir_path, _, files in os.walk(os.path.join(conda_pkg_path, "cache")):
+        for base_path in (("pkgs",), ("envs", LSST_CONDA_ENV_NAME, "pkgs")):
+            conda_pkg_path = os.path.join(stack_dir, "conda", "current", *base_path)
+            for dir_path, _, files in os.walk(os.path.join(conda_pkg_path, "cache")):
                 os.chmod(dir_path, 0o2755)
                 for f in files:
                     full_path = os.path.join(dir_path, f)
                     os.chmod(full_path, 0o644)
-	    os.chmod(os.path.join(conda_pkg_path, "urls"), 0o644)
-	    os.chmod(os.path.join(conda_pkg_path, "urls.txt"), 0o644)
-
+            os.chmod(os.path.join(conda_pkg_path, "urls"), 0o644)
+            os.chmod(os.path.join(conda_pkg_path, "urls.txt"), 0o644)
 
         return sm
 
@@ -562,13 +564,13 @@ if __name__ == "__main__":
     # Only tags matching this regular expression will be fetched from
     # ``EUPS_PKGROOT`` and hence considered for local installation. The more tags
     # are matched, the slower things will be.
-    #VERSION_GLOB = r"(sims_)?w_2019_\d\d|v17_0|v17_0_1"
-    #VERSION_GLOB = r"(sims_)?w_2019_(1[2-9]|[2-5]\d)"
-    #VERSION_GLOB = r"((sims_)?w_2019_(1[2-9]|[2-5]\d))|(d_2019_09_30)"
-    #VERSION_GLOB = r"(sims_)?w_2019_(4[3-9]|5\d)"
-    #VERSION_GLOB = r"w_2020_(0[7-9]|[1-5]\d)"
-    #VERSION_GLOB = r"(sims_)?w_2020_[1-5]\d"
-    #VERSION_GLOB = r"((sims_)?w_2020_(38|39|[4-5]\d))"
+    # VERSION_GLOB = r"(sims_)?w_2019_\d\d|v17_0|v17_0_1"
+    # VERSION_GLOB = r"(sims_)?w_2019_(1[2-9]|[2-5]\d)"
+    # VERSION_GLOB = r"((sims_)?w_2019_(1[2-9]|[2-5]\d))|(d_2019_09_30)"
+    # VERSION_GLOB = r"(sims_)?w_2019_(4[3-9]|5\d)"
+    # VERSION_GLOB = r"w_2020_(0[7-9]|[1-5]\d)"
+    # VERSION_GLOB = r"(sims_)?w_2020_[1-5]\d"
+    # VERSION_GLOB = r"((sims_)?w_2020_(38|39|[4-5]\d))"
     VERSION_GLOB = r"((sims_)?w_2021_(?!(01|02|03|04))\d\d)"
     parser.add_argument('--version-glob', help="pattern to install", default=VERSION_GLOB)
     main(parser.parse_args())
