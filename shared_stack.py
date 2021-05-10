@@ -360,7 +360,7 @@ class StackManager(object):
         """
         Add a line to the stack's startup.py file.
         """
-	startup_path = os.path.join(self.stack_dir, "conda", "current",
+        startup_path = os.path.join(self.stack_dir, "conda", "current",
                                     "envs", LSST_CONDA_ENV_NAME, "eups",
                                     "site", "startup.py")
         with open(startup_path, "a") as startup_py:
