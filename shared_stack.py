@@ -2,7 +2,7 @@
 #
 # LSST Data Management System
 #
-# Copyright 2008-2016  AURA/LSST.
+# Copyright 2008-2022  AURA/LSST.
 #
 # This product includes software developed by the
 # LSST Project (http://www.lsst.org/).
@@ -111,6 +111,8 @@ CONDA_PKGS = [
     ("cx_Oracle", None),
     ("ipdb", None),
     ("psycopg2", None),
+    ("imagemagick", None),
+    ("ffmpeg", None),
 ]
 
 # Top-level products to install into the stack.
