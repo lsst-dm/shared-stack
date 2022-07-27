@@ -1,0 +1,12 @@
+mypy isort pre-commit black pydocstyle build
+ipdb snakeviz line_profiler
+pep8 pyflakes
+jedi=0.17.2 pyct
+ipython jupyter
+panel holoviews hvplot bokeh datashader pyviz_comms
+ffmpeg imagemagick
+fastparquet numba dask-jobqueue
+mysqlclient psycopg2
+lsst-documenteer-pipelines lsst-documenteer-technote
+types-requests types-pyyaml types-click types-pkg_resources
+types-deprecated types-setuptools types-urllib3
