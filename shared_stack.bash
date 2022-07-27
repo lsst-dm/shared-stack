@@ -156,7 +156,7 @@ tmp_load="$ROOT/w_latest/tmp.loadLSST.sh"
 if [ -n "$dryrun" ]; then
   echo "[ -f \"$tmp_load\" ] && mv \"$tmp_load\" \"$ROOT/loadLSST.sh\""
 elif [ -f "$tmp_load" ] && ! diff -q "$ROOT/loadLSST.sh" "$tmp_load" > /dev/null 2>&1; then
-  mv "$ROOT/loadLSST.sh" "$ROOT/loadLSST.sh.bak"
+  [ -f "$ROOT/loadLSST.sh" ] && mv "$ROOT/loadLSST.sh" "$ROOT/loadLSST.sh.bak"
   mv "$tmp_load" "$ROOT/loadLSST.sh"
 fi
 $dryrun rm -f "$ROOT"/tag/*/tmp.loadLSST.sh
