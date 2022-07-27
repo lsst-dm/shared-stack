@@ -160,6 +160,17 @@ elif [ -f "$tmp_load" ] && ! diff -q "$ROOT/loadLSST.sh" "$tmp_load" > /dev/null
   mv "$tmp_load" "$ROOT/loadLSST.sh"
 fi
 $dryrun rm -f "$ROOT"/tag/*/tmp.loadLSST.sh
+# Update current tag to latest weekly
+# Doesn't handle all cases (an old weekly is installed as the latest in an
+# even older environment), but should be good enough
+if [ -f "$tmp/w_list" ]; then
+  (
+    latest=$(head -n 1 "$tmp/w_list")
+    set -x
+    $dryrun source "$ROOT/tag/$latest/loadLSST.sh"
+    $dryrun eups tags --clone="$latest" current
+  )
+fi
 
 #########
 # Cleanup
