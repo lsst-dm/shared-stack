@@ -94,7 +94,7 @@ curl -L https://eups.lsst.codes/stack/src/tags | while read -r line; do
   [[ "$line" =~ \>([dvw][0-9_]+(rc[0-9]+)?)\.list\< ]] && echo "${BASH_REMATCH[1]}"
 done | sort > $tmp/tags
 
-for tag in $(comm -1 -3 <(sort tags.deleted) $tmp/tags); do
+for tag in $(comm -1 -3 <(sort -u tags.deleted) $tmp/tags); do
   dir="$ROOT/tag/$tag"
   [ -d "$dir" ] && continue
   $dryrun mkdir -p "${dir}.$tmp" || continue
