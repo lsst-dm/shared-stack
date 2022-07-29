@@ -132,6 +132,7 @@ for tag in $(comm -1 -3 <(sort tags.deleted) $tmp/tags); do
   ) && [ ! -d "$dir" ] && $dryrun mv "${dir}.$tmp" "$dir"
   # Clean up if we failed or lost the race
   [ -d "${dir}.$tmp" ] && rm -rf "${dir}.$tmp"
+  [ -d "${dir}/${dir}.$tmp" ] && rm -rf "${dir}/${dir}.$tmp"
 done
 rm $tmp/tags
 
