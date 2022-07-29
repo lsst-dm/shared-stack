@@ -1,0 +1,1 @@
+0 4,8,12,16 * * * bash -x ~/shared-stack/shared_stack.bash > ~/shared-stack/logs/$(date -Im).log 2>&1
