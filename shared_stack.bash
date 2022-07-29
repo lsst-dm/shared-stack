@@ -193,14 +193,14 @@ for type in d w; do
       (
         set +x
         [ -n "$dryrun" ] && echo "source $del_dir/loadLSST.sh"
-	# shellcheck disable=SC1091
+        # shellcheck disable=SC1091
         source "$del_dir/loadLSST.sh"
         set -x
         eups list -t "$tag_del" | while read -r pkg ver tag1 tagn; do
           [ -n "$dryrun" ] && echo "$pkg $ver $tag1 $tagn"
           # If this is the only tag (except current), remove the package
           # Otherwise, undeclare the tag
-	  if [[ ( "$tag1" = "$tag_del" && ( "$tagn" = current || -z "$tagn" ) ) \
+          if [[ ( "$tag1" = "$tag_del" && ( "$tagn" = current || -z "$tagn" ) ) \
              || ( "$tag1" = current && "$tagn" = "$tag_del" ) ]]; then
             $dryrun eups remove --force -t "$tag_del" "$pkg"
           else
