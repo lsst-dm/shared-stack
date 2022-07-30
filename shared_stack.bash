@@ -139,6 +139,8 @@ rm $tmp/tags
 # List the installed tags
 (
   cd "$ROOT/tag"
+  # -r reversal assumes d_YYYY_MM_DD and w_YYYY_WW layout
+  # (or at least that sorting gives date order)
   ls -dr d_* > "$STATE/$tmp/d_list" || true
   ls -dr w_* > "$STATE/$tmp/w_list" || true
 )
