@@ -2,7 +2,7 @@ mypy isort pre-commit black pydocstyle build
 ipdb snakeviz line_profiler
 pep8 pyflakes
 jedi=0.17.2 pyct
-ipython jupyter
+ipython jupyterlab
 panel holoviews hvplot bokeh datashader pyviz_comms
 ffmpeg imagemagick
 fastparquet numba dask-jobqueue
