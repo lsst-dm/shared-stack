@@ -98,7 +98,10 @@ for tag in $(comm -1 -3 <(sort -u tags.deleted) $tmp/tags); do
   dir="$ROOT/tag/$tag"
   [ -d "$dir" ] && continue
   $dryrun mkdir -p "${dir}.$tmp" || continue
+  # Temporarily disable error exits so we can capture the subshell status
+  set +e
   (
+     # But exit the subshell on any error
      set -e
      $dryrun cd "${dir}.$tmp"
      $dryrun bash "$STATE/lsstinstall" -T "$tag" -p "$ROOT"/conda -S
@@ -133,7 +136,10 @@ for tag in $(comm -1 -3 <(sort -u tags.deleted) $tmp/tags); do
        echo "conda activate $LSST_CONDA_ENV_NAME" > switch.sh
        echo "$LSST_CONDA_ENV_NAME" > env_name
      fi
-  ) && [ ! -d "$dir" ] && $dryrun mv "${dir}.$tmp" "$dir"
+  )
+  [ "$?" -eq 0 ] && [ ! -d "$dir" ] && $dryrun mv "${dir}.$tmp" "$dir"
+  # Go back to exiting on any error
+  set -e
   # Clean up if we failed or lost the race
   [ -d "${dir}.$tmp" ] && rm -rf "${dir}.$tmp"
   [ -d "${dir}/${dir}.$tmp" ] && rm -rf "${dir}/${dir}.$tmp"
