@@ -109,12 +109,16 @@ for tag in $(comm -1 -3 <(sort -u tags.deleted) $tmp/tags); do
      # When rubin-env-developer becomes available, replace with this:
      # conda list --json | grep rubin-env-developer > /dev/null \
      #   || mamba install rubin-env-developer
+     # Also fix up permissions on the pkgs/urls files; if group can write to
+     # them, conda incorrectly thinks the group can install packages
      if [ -n "$dryrun" ]; then
        echo "conda list --json | grep mypy > /dev/null || mamba install ..."
+       echo "chmod g-w \${CONDA_EXE%bin/conda}/pkgs/urls*"
      else
        # shellcheck disable=SC2046
        conda list --json | grep mypy > /dev/null \
          || mamba install -y -c conda-forge --no-update-deps $(cat "$STATE/developer.txt")
+       chmod g-w "${CONDA_EXE%/bin/conda}"/pkgs/urls*
      fi
      $dryrun eups distrib install -t "$tag" "$PRODUCT"
 
