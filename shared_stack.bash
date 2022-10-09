@@ -179,8 +179,9 @@ $dryrun rm -f "$ROOT"/tag/*/tmp.loadLSST.sh
 if [ -f "$tmp/w_list" ]; then
   (
     latest=$(head -n 1 "$tmp/w_list")
-    set -x
+    set +x
     $dryrun source "$ROOT/tag/$latest/loadLSST.sh"
+    set -x
     $dryrun eups tags --clone="$latest" current
     $dryrun eups tags --clone="$latest" w_latest
   )
@@ -188,8 +189,9 @@ fi
 if [ -f "$tmp/d_list" ]; then
   (
     latest=$(head -n 1 "$tmp/d_list")
-    set -x
+    set +x
     $dryrun source "$ROOT/tag/$latest/loadLSST.sh"
+    set -x
     $dryrun eups tags --clone="$latest" d_latest
   )
 fi
