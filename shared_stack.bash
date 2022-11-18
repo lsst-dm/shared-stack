@@ -87,16 +87,20 @@ mkdir -p "$tmp" "$ROOT/tag"
 [ -e tags.deleted ] || touch tags.deleted
 umask 022
 
-# Get list of tags
 $dryrun curl -L https://ls.st/lsstinstall -o $tmp/lsstinstall
 $dryrun mv $tmp/lsstinstall lsstinstall
+
+# Get list of tags
 curl -L https://eups.lsst.codes/stack/src/tags | while read -r line; do
   [[ "$line" =~ \>([dvw][0-9_]+(rc[0-9]+)?)\.list\< ]] && echo "${BASH_REMATCH[1]}"
 done | sort > $tmp/tags
 
+# For each tag not in the deleted list
 for tag in $(comm -1 -3 <(sort -u tags.deleted) $tmp/tags); do
+  # Skip if we already have this tag
   dir="$ROOT/tag/$tag"
   [ -d "$dir" ] && continue
+
   $dryrun mkdir -p "${dir}.$tmp" || continue
   # Temporarily disable error exits so we can capture the subshell status
   set +e
