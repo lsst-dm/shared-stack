@@ -137,6 +137,7 @@ for tag in $(comm -1 -3 <(sort -u tags.deleted) $tmp/tags); do
        echo "$LSST_CONDA_ENV_NAME" > env_name
      fi
   )
+  # shellcheck disable=SC2181
   [ "$?" -eq 0 ] && [ ! -d "$dir" ] && $dryrun mv "${dir}.$tmp" "$dir"
   # Go back to exiting on any error
   set -e
@@ -184,6 +185,10 @@ if [ -f "$tmp/w_list" ]; then
     set -x
     $dryrun eups tags --clone="$latest" current
     $dryrun eups tags --clone="$latest" w_latest
+    tagfile="$EUPS_PATH/ups_db/global.tags"
+    if ! grep ' w_latest' "$tagfile" > /dev/null 2>&1; then
+      echo "$(cat "$tagfile")" w_latest > "$tagfile.tmp" && mv "$tagfile.tmp" "$tagfile"
+    fi
   )
 fi
 if [ -f "$tmp/d_list" ]; then
@@ -193,6 +198,10 @@ if [ -f "$tmp/d_list" ]; then
     $dryrun source "$ROOT/tag/$latest/loadLSST.sh"
     set -x
     $dryrun eups tags --clone="$latest" d_latest
+    tagfile="$EUPS_PATH/ups_db/global.tags"
+    if ! grep ' d_latest' "$tagfile" > /dev/null 2>&1; then
+      echo "$(cat "$tagfile")" d_latest > "$tagfile".tmp && mv "$tagfile.tmp" "$tagfile"
+    fi
   )
 fi
 
