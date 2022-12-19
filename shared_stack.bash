@@ -137,7 +137,7 @@ for tag in $(comm -1 -3 <(sort -u tags.deleted) $tmp/tags); do
        echo "$LSST_CONDA_ENV_NAME" > env_name
      fi
   )
-  # shellcheck disable SC2181
+  # shellcheck disable=SC2181
   [ "$?" -eq 0 ] && [ ! -d "$dir" ] && $dryrun mv "${dir}.$tmp" "$dir"
   # Go back to exiting on any error
   set -e
