@@ -87,16 +87,20 @@ mkdir -p "$tmp" "$ROOT/tag"
 [ -e tags.deleted ] || touch tags.deleted
 umask 022
 
-# Get list of tags
 $dryrun curl -L https://ls.st/lsstinstall -o $tmp/lsstinstall
 $dryrun mv $tmp/lsstinstall lsstinstall
+
+# Get list of tags
 curl -L https://eups.lsst.codes/stack/src/tags | while read -r line; do
   [[ "$line" =~ \>([dvw][0-9_]+(rc[0-9]+)?)\.list\< ]] && echo "${BASH_REMATCH[1]}"
 done | sort > $tmp/tags
 
+# For each tag not in the deleted list
 for tag in $(comm -1 -3 <(sort -u tags.deleted) $tmp/tags); do
+  # Skip if we already have this tag
   dir="$ROOT/tag/$tag"
   [ -d "$dir" ] && continue
+
   $dryrun mkdir -p "${dir}.$tmp" || continue
   # Temporarily disable error exits so we can capture the subshell status
   set +e
@@ -109,18 +113,15 @@ for tag in $(comm -1 -3 <(sort -u tags.deleted) $tmp/tags); do
      $dryrun source loadLSST.sh
      set -x
      # Install the developer add-on packages if needed
-     # When rubin-env-developer becomes available, replace with this:
-     # conda list --json | grep rubin-env-developer > /dev/null \
-     #   || mamba install rubin-env-developer
      # Also fix up permissions on the pkgs/urls files; if group can write to
      # them, conda incorrectly thinks the group can install packages
      if [ -n "$dryrun" ]; then
-       echo "conda list --json | grep mypy > /dev/null || mamba install ..."
+       echo "conda list --json | grep rubin-env-developer > /dev/null \\"
+       echo "  || mamba install -y -c conda-forge --no-update-deps rubin-env-developer"
        echo "chmod g-w \${CONDA_EXE%bin/conda}/pkgs/urls*"
      else
-       # shellcheck disable=SC2046
-       conda list --json | grep mypy > /dev/null \
-         || mamba install -y -c conda-forge --no-update-deps $(cat "$STATE/developer.txt")
+       conda list --json | grep rubin-env-developer > /dev/null \
+         || mamba install -y -c conda-forge --no-update-deps rubin-env-developer
        chmod g-w "${CONDA_EXE%/bin/conda}"/pkgs/urls*
      fi
      $dryrun eups distrib install -t "$tag" "$PRODUCT"
@@ -137,6 +138,7 @@ for tag in $(comm -1 -3 <(sort -u tags.deleted) $tmp/tags); do
        echo "$LSST_CONDA_ENV_NAME" > env_name
      fi
   )
+  # Need to check $? instead of using "if" or "&&" so that -e can exit early
   # shellcheck disable=SC2181
   [ "$?" -eq 0 ] && [ ! -d "$dir" ] && $dryrun mv "${dir}.$tmp" "$dir"
   # Go back to exiting on any error
