@@ -49,8 +49,8 @@
 ROOT=/scratch/rubinsw
 # State directory
 STATE=~/shared-stack
-# Top-level product to install
-PRODUCT=lsst_sitcom
+# Top-level products to install
+PRODUCTS="lsst_sitcom ctrl_platform_s3df"
 # Number of daily releases to keep
 # shellcheck disable=SC2034
 KEEP_d=24
@@ -124,7 +124,10 @@ for tag in $(comm -1 -3 <(sort -u tags.deleted) $tmp/tags); do
          || mamba install -y -c conda-forge --no-update-deps rubin-env-developer
        chmod g-w "${CONDA_EXE%/bin/conda}"/pkgs/urls*
      fi
-     $dryrun eups distrib install -t "$tag" "$PRODUCT"
+     for PRODUCT in $PRODUCTS
+     do
+       $dryrun eups distrib install -t "$tag" "$PRODUCT"
+     done
 
      # Rewrite load scripts and write useful files
      $dryrun cp loadLSST.sh tmp.loadLSST.sh
