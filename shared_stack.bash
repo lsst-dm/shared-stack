@@ -239,7 +239,7 @@ for type in d w; do
           # Otherwise, undeclare the tag
           if [[ ( "$tag1" = "$tag_del" && ( "$tagn" = current || -z "$tagn" ) ) \
              || ( "$tag1" = current && "$tagn" = "$tag_del" ) ]]; then
-            $dryrun eups remove --force -t "$tag_del" "$pkg"
+            $dryrun eups remove --force --noCheck -t "$tag_del" "$pkg"
           else
             $dryrun eups undeclare -t "$tag_del" "$pkg"
           fi
