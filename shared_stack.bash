@@ -53,7 +53,7 @@ STATE=~/shared-stack
 PRODUCTS="lsst_sitcom lsst_distrib"
 # Number of daily releases to keep
 # shellcheck disable=SC2034
-KEEP_d=24
+KEEP_d=48
 # Number of weekly releases to keep
 # shellcheck disable=SC2034
 KEEP_w=26
