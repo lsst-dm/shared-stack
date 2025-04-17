@@ -50,10 +50,10 @@ ROOT=/scratch/rubinsw
 # State directory
 STATE=~/shared-stack
 # Top-level products to install
-PRODUCTS="lsst_sitcom"
+PRODUCTS="lsst_sitcom lsst_distrib"
 # Number of daily releases to keep
 # shellcheck disable=SC2034
-KEEP_d=24
+KEEP_d=48
 # Number of weekly releases to keep
 # shellcheck disable=SC2034
 KEEP_w=26
@@ -117,11 +117,11 @@ for tag in $(comm -1 -3 <(sort -u tags.deleted) $tmp/tags); do
      # them, conda incorrectly thinks the group can install packages
      if [ -n "$dryrun" ]; then
        echo "conda list --json | grep rubin-env-developer > /dev/null \\"
-       echo "  || mamba install -y -c conda-forge --no-update-deps rubin-env-developer"
+       echo "  || mamba install -y -c conda-forge rubin-env-developer"
        echo "chmod g-w \${CONDA_EXE%bin/conda}/pkgs/urls*"
      else
        conda list --json | grep rubin-env-developer > /dev/null \
-         || mamba install -y -c conda-forge --no-update-deps rubin-env-developer
+         || mamba install -y -c conda-forge rubin-env-developer
        chmod g-w "${CONDA_EXE%/bin/conda}"/pkgs/urls*
      fi
      for PRODUCT in $PRODUCTS
@@ -184,8 +184,9 @@ for type in d w; do
   (
     set +x
     $dryrun source "$ROOT/${type}_latest/loadLSST.sh"
+    echo "conda update -y astropy-iers-data"
+    $dryrun conda update -y astropy-iers-data
     set -x
-    conda update -y astropy-iers-data
   )
 done
 
@@ -202,8 +203,8 @@ if [ -f "$tmp/w_list" ]; then
     tagfile="$EUPS_PATH/ups_db/global.tags"
     if ! grep ' w_latest' "$tagfile" > /dev/null 2>&1; then
       echo "$(cat "$tagfile")" w_latest > "$tagfile.tmp" && mv "$tagfile.tmp" "$tagfile"
-    $dryrun eups tags --clone="$latest" w_latest
     fi
+    $dryrun eups tags --clone="$latest" w_latest
   )
 fi
 if [ -f "$tmp/d_list" ]; then
@@ -215,8 +216,8 @@ if [ -f "$tmp/d_list" ]; then
     tagfile="$EUPS_PATH/ups_db/global.tags"
     if ! grep ' d_latest' "$tagfile" > /dev/null 2>&1; then
       echo "$(cat "$tagfile")" d_latest > "$tagfile".tmp && mv "$tagfile.tmp" "$tagfile"
-    $dryrun eups tags --clone="$latest" d_latest
     fi
+    $dryrun eups tags --clone="$latest" d_latest
   )
 fi
 

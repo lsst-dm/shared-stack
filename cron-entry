@@ -1,2 +1,2 @@
 01 0 1 * * mkdir -p ~/shared-stack/logs/$(date +\%Y-\%m)
-0 4,8,12,16 * * * BASH_ENV=~/.bashrc bash ~/shared-stack/shared_stack.bash > ~/shared-stack/logs/$(date +\%Y-\%m)/$(date -Im).log 2>&1
+0 3,6,9,12 * * * BASH_ENV=~/.bashrc bash ~/shared-stack/shared_stack.bash > ~/shared-stack/logs/$(date +\%Y-\%m)/$(date -Im).log 2>&1
