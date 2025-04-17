@@ -50,7 +50,7 @@ ROOT=/scratch/rubinsw
 # State directory
 STATE=~/shared-stack
 # Top-level products to install
-PRODUCTS="lsst_sitcom"
+PRODUCTS="lsst_sitcom lsst_distrib"
 # Number of daily releases to keep
 # shellcheck disable=SC2034
 KEEP_d=24
