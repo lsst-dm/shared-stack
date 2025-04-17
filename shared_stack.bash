@@ -184,8 +184,9 @@ for type in d w; do
   (
     set +x
     $dryrun source "$ROOT/${type}_latest/loadLSST.sh"
+    echo "conda update -y astropy-iers-data"
+    $dryrun conda update -y astropy-iers-data
     set -x
-    conda update -y astropy-iers-data
   )
 done
 
