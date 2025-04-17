@@ -117,11 +117,11 @@ for tag in $(comm -1 -3 <(sort -u tags.deleted) $tmp/tags); do
      # them, conda incorrectly thinks the group can install packages
      if [ -n "$dryrun" ]; then
        echo "conda list --json | grep rubin-env-developer > /dev/null \\"
-       echo "  || mamba install -y -c conda-forge --no-update-deps rubin-env-developer"
+       echo "  || mamba install -y -c conda-forge rubin-env-developer"
        echo "chmod g-w \${CONDA_EXE%bin/conda}/pkgs/urls*"
      else
        conda list --json | grep rubin-env-developer > /dev/null \
-         || mamba install -y -c conda-forge --no-update-deps rubin-env-developer
+         || mamba install -y -c conda-forge rubin-env-developer
        chmod g-w "${CONDA_EXE%/bin/conda}"/pkgs/urls*
      fi
      for PRODUCT in $PRODUCTS
