@@ -46,7 +46,7 @@
 ###############
 
 # Software root directory
-ROOT=/scratch/rubinsw
+ROOT=/sdf/group/rubin/sw
 # State directory
 STATE=~/shared-stack
 # Top-level products to install
@@ -91,8 +91,8 @@ $dryrun curl -L https://ls.st/lsstinstall -o $tmp/lsstinstall
 $dryrun mv $tmp/lsstinstall lsstinstall
 
 # Get list of tags
-curl -L https://eups.lsst.codes/stack/src/tags | while read -r line; do
-  [[ "$line" =~ \>([dvw][0-9_]+(rc[0-9]+)?)\.list\< ]] && echo "${BASH_REMATCH[1]}"
+curl -L https://eups.lsst.cloud/stack/src/tags/index.json | jq . | while read -r line; do
+  [[ "$line" =~ \"([dvw][0-9_]+(rc[0-9]+)?)\.list\" ]] && echo "${BASH_REMATCH[1]}"
 done | sort > $tmp/tags
 
 # For each tag not in the deleted list
@@ -209,6 +209,7 @@ if [ -f "$tmp/w_list" ]; then
 fi
 if [ -f "$tmp/d_list" ]; then
   (
+    set +e
     latest=$(head -n 1 "$tmp/d_list")
     set +x
     $dryrun source "$ROOT/tag/$latest/loadLSST.sh"
